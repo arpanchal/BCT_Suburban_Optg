@@ -1,0 +1,5 @@
+unique_trains=1661
+ME_in_meta=266
+ME_with_stops=234
+suspicious_large_gaps=0
+exact_dups=1
