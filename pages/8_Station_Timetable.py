@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, C
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Station Timetable Cards", layout="wide")
+# st.set_page_config(page_title="Station Timetable Cards", layout="wide")
 st.title("📋 Station Timetable Cards")
 st.caption("Printable per-station timetables — one card per station for platform staff")
 

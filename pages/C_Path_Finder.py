@@ -8,7 +8,7 @@ from _path_finder import (LINES_META, LINE_ENDPOINT_RULES, CROSSOVERS,
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Path Finder", layout="wide")
+# st.set_page_config(page_title="Path Finder", layout="wide")
 st.title("🔍 Path Finder — Available Slots for New Trains")
 st.caption(
     "Scan existing timetable to find time windows where a new train can be "

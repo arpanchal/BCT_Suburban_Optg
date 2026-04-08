@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, L
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Headway Chart", layout="wide")
+# st.set_page_config(page_title="Headway Chart", layout="wide")
 st.title("📏 Headway Chart — Gap Between Consecutive Trains")
 
 stops = load_stops(_mtime=_stops_mtime())

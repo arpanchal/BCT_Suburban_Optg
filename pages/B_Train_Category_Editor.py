@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from _utils import _stops_mtime, _meta_mtime, load_meta, STATIONS, CAT_COLORS, LINES_DEF
 import pandas as pd
 
-st.set_page_config(page_title="Train Category Editor", layout="wide")
+# st.set_page_config(page_title="Train Category Editor", layout="wide")
 st.title("🏷️ Train Category & Line Editor")
 st.caption("Tag Mail/Express trains, assign line types, and set mid-route line switches. "
            "Changes are saved to train_meta.json and take effect immediately on all charts.")

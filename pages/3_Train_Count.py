@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, L
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Train Count by Hour", layout="wide")
+# st.set_page_config(page_title="Train Count by Hour", layout="wide")
 st.title("📈 Train Count by Hour")
 
 stops = load_stops(_mtime=_stops_mtime())
@@ -118,12 +118,17 @@ cat_colors_js = {
 }
 
 html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body{{margin:0;background:#0f1117;font-family:'Segoe UI',Arial,sans-serif;}}
-  .tooltip{{position:fixed;background:rgba(12,14,26,0.97);border:1px solid #445;
-    border-radius:6px;padding:8px 12px;font-size:11px;color:#eee;pointer-events:none;display:none;z-index:999;line-height:1.7;}}
+  *{{box-sizing:border-box;margin:0;padding:0;}}
+  body{{background:#0f1117;font-family:'Segoe UI',Arial,sans-serif;}}
+  #wrap{{width:100%;}}
+  #chart{{width:100%;height:auto;display:block;}}
+  .tooltip{{position:fixed;background:rgba(12,14,26,0.97);border:1px solid #445566;
+    border-radius:6px;padding:8px 12px;font-size:12px;color:#eee;pointer-events:none;
+    display:none;z-index:9999;line-height:1.7;max-width:220px;}}
 </style></head><body>
-<svg id="chart"></svg>
+<div id="wrap"><svg id="chart"></svg></div>
 <div class="tooltip" id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
@@ -131,82 +136,90 @@ const HOURS = {json.dumps(hours)};
 const DATA  = {json.dumps(data_by_cat)};
 const CATS  = {json.dumps(categories)};
 const COLORS= {json.dumps(cat_colors_js)};
-const PALETTE= ["#4CAF50","#29B6F6","#FF7043","#E65100","#FF4081","#FFD54F","#7C83FD","#78909C","#00BCD4","#AB47BC"];
-const M     = {{top:30,right:140,bottom:55,left:55}};
-const W     = 1100 - M.left - M.right;
-const H     = 360  - M.top  - M.bottom;
+const PALETTE=["#4CAF50","#29B6F6","#FF7043","#E65100","#FF4081","#FFD54F","#7C83FD","#78909C","#00BCD4","#AB47BC"];
 
-const svg = d3.select("#chart").attr("width",W+M.left+M.right).attr("height",H+M.top+M.bottom);
-const g   = svg.append("g").attr("transform",`translate(${{M.left}},${{M.top}})`);
+// Fixed viewBox dimensions — SVG scales to container width automatically
+const VW=1100, VH=480;
+const M={{top:30,right:145,bottom:80,left:55}};
+const W=VW-M.left-M.right, H=VH-M.top-M.bottom;
+
+const svg=d3.select("#chart")
+  .attr("viewBox",`0 0 ${{VW}} ${{VH}}`)
+  .attr("preserveAspectRatio","xMinYMid meet");
 svg.insert("rect","g").attr("width","100%").attr("height","100%").attr("fill","#0f1117");
+const g=svg.append("g").attr("transform",`translate(${{M.left}},${{M.top}})`);
 
-const maxVal = Math.max(d3.max(CATS.flatMap(c=>DATA[c]||[])), 10);
-const xSc = d3.scaleBand().domain(HOURS).range([0,W]).padding(0.18);
-const ySc = d3.scaleLinear().domain([0,maxVal]).range([H,0]);
+const maxVal=Math.max(d3.max(CATS.flatMap(c=>DATA[c]||[])),10);
+const xSc=d3.scaleBand().domain(HOURS).range([0,W]).padding(0.18);
+const ySc=d3.scaleLinear().domain([0,maxVal]).range([H,0]);
 
+// Grid lines
 [10,20,30,40,50,60,80,100,120,150].filter(v=>v<=maxVal).forEach(v=>{{
   g.append("line").attr("x1",0).attr("x2",W).attr("y1",ySc(v)).attr("y2",ySc(v))
    .attr("stroke","#222840").attr("stroke-width",1).attr("stroke-dasharray","3,3");
   g.append("text").attr("x",-4).attr("y",ySc(v)+3).attr("text-anchor","end")
-   .attr("fill","#667").attr("font-size",9).text(v);
+   .attr("fill","#667").attr("font-size",10).text(v);
 }});
 
-const tip = d3.select("#tip");
-const bw  = xSc.bandwidth() / CATS.length;
+const tip=d3.select("#tip");
+const bw=xSc.bandwidth()/CATS.length;
 
-CATS.forEach((cat,ci) => {{
-  const col = COLORS[cat] || PALETTE[ci % PALETTE.length];
-  const vals = DATA[cat]||[];
-  HOURS.forEach((hr,hi) => {{
+CATS.forEach((cat,ci)=>{{
+  const col=COLORS[cat]||PALETTE[ci%PALETTE.length];
+  const vals=DATA[cat]||[];
+  HOURS.forEach((hr,hi)=>{{
     const v=vals[hi]||0;
     if(v===0) return;
-    const bx = xSc(hr) + ci*bw;
+    const bx=xSc(hr)+ci*bw;
+    const showTip=(e,src)=>{{
+      tip.style("display","block")
+         .html(`<b>${{String(hr).padStart(2,"0")}}:00–${{String(hr+1).padStart(2,"0")}}:00</b><br>${{cat}}: <b>${{v}} trains</b>`)
+         .style("left",(e.clientX+14)+"px").style("top",(e.clientY-10)+"px");
+    }};
     g.append("rect").attr("x",bx).attr("y",ySc(v)).attr("width",bw*0.92)
-     .attr("height",H-ySc(v)).attr("fill",col).attr("rx",1.5).attr("opacity",0.85)
-     .on("mouseover",function(e){{
-       d3.select(this).attr("opacity",1);
-       tip.style("display","block")
-          .html(`<b>${{String(hr).padStart(2,"0")}}:00–${{String(hr+1).padStart(2,"0")}}:00</b><br>${{cat}}: <b>${{v}} trains</b>`)
-          .style("left",(e.clientX+14)+"px").style("top",(e.clientY-10)+"px");
-     }})
-     .on("mousemove",e=>tip.style("left",(e.clientX+14)+"px").style("top",(e.clientY-10)+"px"))
-     .on("mouseout",function(){{d3.select(this).attr("opacity",0.85);tip.style("display","none");}});
+     .attr("height",H-ySc(v)).attr("fill",col).attr("rx",2).attr("opacity",0.85)
+     .on("mouseover",(e)=>{{d3.select(e.target).attr("opacity",1);showTip(e);}})
+     .on("mousemove",(e)=>tip.style("left",(e.clientX+14)+"px").style("top",(e.clientY-10)+"px"))
+     .on("mouseout",(e)=>{{d3.select(e.target).attr("opacity",0.85);tip.style("display","none");}})
+     .on("touchstart",(e)=>{{e.preventDefault();showTip(e.touches[0]);}})
+     .on("touchend",()=>setTimeout(()=>tip.style("display","none"),1800));
   }});
 }});
 
 // X axis
 g.append("g").attr("transform",`translate(0,${{H}})`)
  .call(d3.axisBottom(xSc).tickFormat(h=>`${{String(h).padStart(2,"0")}}:00`))
- .selectAll("text").attr("fill","#778").attr("font-size",9)
+ .selectAll("text").attr("fill","#778").attr("font-size",10)
  .attr("transform","rotate(-45)").attr("text-anchor","end");
 g.selectAll(".domain,.tick line").attr("stroke","#333");
 
-g.append("text").attr("transform","rotate(-90)").attr("x",-H/2).attr("y",-42)
- .attr("text-anchor","middle").attr("fill","#778").attr("font-size",11).text("Train count");
+// Y axis label
+g.append("text").attr("transform","rotate(-90)").attr("x",-H/2).attr("y",-38)
+ .attr("text-anchor","middle").attr("fill","#778").attr("font-size",12).text("Train count");
 
-// Legend
+// Legend (right side, inside viewBox)
 CATS.forEach((cat,i)=>{{
   const col=COLORS[cat]||PALETTE[i%PALETTE.length];
-  const lx=W+15, ly=i*20;
-  g.append("rect").attr("x",lx).attr("y",ly).attr("width",14).attr("height",10).attr("fill",col).attr("rx",2);
-  g.append("text").attr("x",lx+18).attr("y",ly+9).attr("fill","#ccc").attr("font-size",10).text(cat);
+  const lx=W+18, ly=i*22;
+  g.append("rect").attr("x",lx).attr("y",ly).attr("width",14).attr("height",12).attr("fill",col).attr("rx",2);
+  g.append("text").attr("x",lx+18).attr("y",ly+10).attr("fill","#ccc").attr("font-size",11).text(cat);
 }});
 
 // Peak hour marker
-const peakHr = HOURS.reduce((a,h)=>{{
+const peakHr=HOURS.reduce((a,h)=>{{
   const s=CATS.reduce((t,c)=>(DATA[c]||[])[HOURS.indexOf(h)]+t,0);
   const sa=CATS.reduce((t,c)=>(DATA[c]||[])[HOURS.indexOf(a)]+t,0);
   return s>sa?h:a;
-}}, HOURS[0]);
+}},HOURS[0]);
 g.append("line").attr("x1",xSc(peakHr)+xSc.bandwidth()/2).attr("x2",xSc(peakHr)+xSc.bandwidth()/2)
- .attr("y1",0).attr("y2",H).attr("stroke","#FFD700").attr("stroke-width",1.5)
- .attr("stroke-dasharray","5,3").attr("opacity",0.6);
+ .attr("y1",0).attr("y2",H).attr("stroke","#FFD700").attr("stroke-width",2)
+ .attr("stroke-dasharray","5,3").attr("opacity",0.7);
 g.append("text").attr("x",xSc(peakHr)+xSc.bandwidth()/2).attr("y",-12)
- .attr("text-anchor","middle").attr("fill","#FFD700").attr("font-size",9)
+ .attr("text-anchor","middle").attr("fill","#FFD700").attr("font-size",10)
  .text(`Peak ${{String(peakHr).padStart(2,"0")}}:00`);
 </script></body></html>"""
 
-st.components.v1.html(html, height=430)
+st.components.v1.html(html, height=480)
 
 # Summary table
 st.markdown("### Hourly Summary")

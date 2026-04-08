@@ -53,6 +53,7 @@ def build_chart_html(
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <style>
   *{{box-sizing:border-box;margin:0;padding:0;}}
   html,body{{width:100%;height:100%;background:{BG};font-family:'Segoe UI',Arial,sans-serif;overflow:hidden;}}
@@ -113,6 +114,24 @@ def build_chart_html(
     #chart-area-{chart_id}{{display:block!important;overflow:visible!important;}}
     #corner-{chart_id},#x-axis-{chart_id},#y-axis-{chart_id}{{display:none!important;}}
     #body-{chart_id}{{overflow:visible!important;}}
+  }}
+  /* ── Mobile responsive ── */
+  @media (max-width:640px){{
+    #toolbar-{chart_id}{{
+      gap:4px;padding:6px 8px;
+      justify-content:flex-start;
+    }}
+    #toolbar-{chart_id} button{{
+      padding:6px 11px;font-size:12px;min-height:36px;
+    }}
+    #zoom-val-{chart_id}{{font-size:13px;}}
+    #chart-area-{chart_id}{{
+      grid-template-columns:60px 1fr;
+    }}
+    /* Hide right y-axis on small screens */
+    #y-axis-right-{chart_id},#corner-right-{chart_id}{{display:none!important;}}
+    #body-{chart_id}::-webkit-scrollbar{{width:12px;height:12px;}}
+    .tip-{chart_id}{{font-size:12px;min-width:160px;max-width:240px;}}
   }}
 </style></head><body>
 <div id="app-{chart_id}">

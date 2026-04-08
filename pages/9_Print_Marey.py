@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, H
 from _chart_builder import build_chart_html
 from collections import defaultdict
 
-st.set_page_config(page_title="Print Marey Chart", layout="wide")
+# st.set_page_config(page_title="Print Marey Chart", layout="wide")
 st.title("🖨️ Print Marey Chart — White Background")
 st.caption("Optimised for large/continuous paper. Ctrl+P → Save as PDF. SVG export available for vector editing.")
 
@@ -44,6 +44,7 @@ cell_w        = st.sidebar.slider("px per minute",       1,  6,  2)
 show_labels   = st.sidebar.checkbox("Train numbers on lines", True)
 label_min_gap = st.sidebar.slider("Min label gap (px)", 20, 200, 70)
 show_markers  = st.sidebar.checkbox("Minute reference dots & ticks", True)
+chart_height  = st.sidebar.slider("📀 Chart height (px)", 500, 1400, 950, 50)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**🔦 Highlight Train**")
@@ -169,7 +170,7 @@ else:
         highlight_train=highlight_train,
         chart_id="print",
     )
-    st.components.v1.html(html, height=820, scrolling=False)
+    st.components.v1.html(html, height=chart_height, scrolling=False)
 
 st.markdown("---")
 st.markdown("""

@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Reversal Summary", layout="wide")
+# st.set_page_config(page_title="Reversal Summary", layout="wide")
 st.title("🔄 Reversal Summary")
 st.caption("Which trains reverse where — helps crew plan handovers and platform allocation")
 

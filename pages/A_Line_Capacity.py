@@ -6,7 +6,7 @@ from _chart_builder import build_chart_html
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Line Capacity", layout="wide")
+# st.set_page_config(page_title="Line Capacity", layout="wide")
 st.title("🛤️ Line Capacity Chart")
 st.caption("Per-line Marey chart. Red zones = headway < threshold. "
            "Hover conflicts for details. Tag Mail/Express in 🏷️ Category Editor.")

@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, CARS_OPTIONS, cars_filter_label, HALT_STNS
 from collections import defaultdict
 
-st.set_page_config(page_title="Next Train", layout="wide")
+# st.set_page_config(page_title="Next Train", layout="wide")
 st.title("⏱️ Next Train from Station")
 st.caption("Type a time and station to see upcoming departures — useful for real-time staff queries")
 

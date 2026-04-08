@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, HALT_STNS
 import pandas as pd
 
-st.set_page_config(page_title="Halt Durations", layout="wide")
+# st.set_page_config(page_title="Halt Durations", layout="wide")
 st.title("⏸️ Halt Durations — KLV / PLG / BOR / VGN")
 st.caption("Dwell time at intermediate halt stations for crew planning and scheduling")
 

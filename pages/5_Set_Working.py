@@ -6,7 +6,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS
 from collections import defaultdict
 import pandas as pd
 
-st.set_page_config(page_title="Set Working", layout="wide")
+# st.set_page_config(page_title="Set Working", layout="wide")
 st.title("🔧 Set Working Sheet")
 st.caption("Full day working for any set number — shows all trains operated by a set in sequence")
 

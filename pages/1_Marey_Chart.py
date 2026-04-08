@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, STATIONS, H
 from _chart_builder import build_chart_html
 from collections import defaultdict, Counter
 
-st.set_page_config(page_title="Marey Chart", layout="wide", initial_sidebar_state="expanded")
+# st.set_page_config(page_title="Marey Chart", layout="wide", initial_sidebar_state="collapsed")
 stops = load_stops(_mtime=_stops_mtime())
 meta  = load_meta(_mtime=_meta_mtime())
 
@@ -46,6 +46,7 @@ show_labels    = st.sidebar.checkbox("Train numbers on lines", True)
 label_min_gap  = st.sidebar.slider("Min label gap (px)", 20, 200, 60)
 show_markers   = st.sidebar.checkbox("Minute reference dots & ticks", True)
 print_mode     = st.sidebar.checkbox("🖨️ Print mode (white bg)", False)
+chart_height   = st.sidebar.slider("📀 Chart height (px)", 500, 1400, 900, 50)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**🔦 Highlight Train**")
@@ -221,4 +222,4 @@ else:
         highlight_train=highlight_train,
         chart_id="marey",
     )
-    st.components.v1.html(html, height=780, scrolling=False)
+    st.components.v1.html(html, height=chart_height, scrolling=False)
