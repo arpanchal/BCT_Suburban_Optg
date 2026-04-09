@@ -219,7 +219,7 @@ g.append("text").attr("x",xSc(peakHr)+xSc.bandwidth()/2).attr("y",-12)
  .text(`Peak ${{String(peakHr).padStart(2,"0")}}:00`);
 </script></body></html>"""
 
-st.components.v1.html(html, height=480)
+st.components.v1.html(html, height=700)
 
 # Summary table
 st.markdown("### Hourly Summary")
