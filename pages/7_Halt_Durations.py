@@ -5,7 +5,7 @@ from _utils import _stops_mtime, _meta_mtime, load_stops, load_meta, HALT_STNS
 import pandas as pd
 
 # st.set_page_config(page_title="Halt Durations", layout="wide")
-st.title("⏸️ Halt Durations — KLV / PLG / BOR / VGN")
+st.title("⏸️ Halt Durations")
 st.caption("Dwell time at intermediate halt stations for crew planning and scheduling")
 
 stops = load_stops(_mtime=_stops_mtime())
