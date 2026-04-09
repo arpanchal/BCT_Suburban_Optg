@@ -3,7 +3,7 @@ import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from _utils import load_stops, load_meta, STATIONS, LINES_DEF, CAT_COLORS
-from _path_finder import (LINES_META, LINE_ENDPOINT_RULES, CROSSOVERS,
+from _path_finder_ import (LINES_META, LINE_ENDPOINT_RULES, CROSSOVERS,
                            find_paths, load_occupancy, find_multi_line_paths, check_departure)
 from collections import defaultdict
 import pandas as pd
