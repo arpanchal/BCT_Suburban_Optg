@@ -66,7 +66,7 @@ def highlight_halt(val):
         if val >= 5:  return "background:#4a3000;color:white"
     return ""
 
-st.dataframe(df.style.applymap(highlight_halt, subset=["Halt (min)"]),
+st.dataframe(df.style.map(highlight_halt, subset=["Halt (min)"]),
              use_container_width=True, height=500)
 
 st.download_button("⬇️ Download CSV", df.to_csv(index=False),
