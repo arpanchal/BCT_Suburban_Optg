@@ -91,16 +91,26 @@ if sheet_url:
                 progress.progress(5, "Authenticating with Google Sheets…")
                 
                 creds_dict = None
-                if os.path.exists(cred_path):
+                source = None
+                if "gcp_service_account" in st.secrets:
+                    creds_dict = dict(st.secrets["gcp_service_account"])
+                    source = "Streamlit Cloud Secrets"
+                elif os.path.exists(cred_path):
                     with open(cred_path, 'r', encoding='utf-8') as f:
                         creds_dict = json.load(f)
+                    source = "credentials.json file"
                 else:
-                    st.error("No credentials.json found on disk. Please upload it alongside app.py.")
+                    st.error("❌ Authentication Missing! No `credentials.json` found, and no `[gcp_service_account]` found in st.secrets.")
                     st.stop()
 
                 if creds_dict and "private_key" in creds_dict:
                     pk = creds_dict["private_key"]
+                    # Clean up any mangled string formatting
                     pk = pk.replace('\\n', '\n').replace('\r\n', '\n').strip('"').strip("'")
+                    # Ensure newlines instead of raw spaces
+                    if "\\n" not in pk and "\n" not in pk and " " in pk[27:50]: 
+                        st.error("❌ Cloud Secret corrupted! Your private key contains spaces instead of line breaks. Please paste the exact raw JSON block directly into Streamlit Secrets.")
+                        st.stop()
                     creds_dict["private_key"] = pk
                     
                 gc = gspread.service_account_from_dict(creds_dict)
@@ -112,11 +122,10 @@ if sheet_url:
                     wb = gc.open_by_key(sheet_id)
                 except Exception as e:
                     if 'Invalid JWT Signature' in str(e):
-                        pk = creds_dict.get('private_key', '')
                         log.empty()
                         import hashlib
-                        pk_hash = hashlib.md5(pk.encode('utf-8')).hexdigest()
-                        st.error(f"❌ **Google Auth Rejected Your Key!**\n\nThe app successfully loaded `credentials.json` from disk, but the generated signature was still rejected by Google. If this works locally but fails on the cloud, the file pushed to Github is either corrupted or is a different key entirely.\n\n**Diagnostic Output:**\n`Key MD5 Hash: {pk_hash}`\n`Key Length: {len(pk)}`\n`Newline Count: {pk.count(chr(10))}`\n\n**Action:** Run your local app and see if the MD5 hash matches this exactly. If they don't match, your deployed file is subtly broken! If they DO match, your Google Cloud service account might be region-locked or experiencing API scope issues.")
+                        pk_hash = hashlib.md5(creds_dict.get('private_key', '').encode('utf-8')).hexdigest()
+                        st.error(f"❌ **Google Auth Rejected Your Key loaded from: {source}**\n\nThe app successfully loaded the configuration, but Google rejected the cryptographic payload. This means the key you deployed has been explicitly revoked on Google Cloud, or is structurally broken!\n\n**Diagnostic Check:**\n`Source:` {source}\n`Key MD5:` {pk_hash}")
                         st.stop()
                     raise e
             
