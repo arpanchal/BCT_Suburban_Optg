@@ -91,25 +91,18 @@ if sheet_url:
                 progress.progress(5, "Authenticating with Google Sheets…")
                 
                 creds_dict = None
-                if "gcp_service_account" in st.secrets:
-                    creds_dict = dict(st.secrets["gcp_service_account"])
-                elif os.path.exists(cred_path):
+                if os.path.exists(cred_path):
                     with open(cred_path, 'r', encoding='utf-8') as f:
                         creds_dict = json.load(f)
                 else:
-                    st.error("No credentials.json found on disk, and no gcp_service_account found in st.secrets.")
+                    st.error("No credentials.json found on disk. Please upload it alongside app.py.")
                     st.stop()
 
                 if creds_dict and "private_key" in creds_dict:
                     pk = creds_dict["private_key"]
-                    # 1. Fix literal \n text
-                    pk = pk.replace('\\n', '\n')
-                    # 2. Strip Windows carriage returns
-                    pk = pk.replace('\r\n', '\n')
-                    # 3. Strip accidental quotes
-                    pk = pk.strip('"').strip("'")
-                    
+                    pk = pk.replace('\\n', '\n').replace('\r\n', '\n').strip('"').strip("'")
                     creds_dict["private_key"] = pk
+                    
                 gc = gspread.service_account_from_dict(creds_dict)
             
                 progress.progress(15, "Opening Spreadsheet…")
@@ -121,7 +114,9 @@ if sheet_url:
                     if 'Invalid JWT Signature' in str(e):
                         pk = creds_dict.get('private_key', '')
                         log.empty()
-                        st.error(f"❌ **Google Auth Rejected Your Key!**\n\nThe `private_key` string loaded into the app memory by your cloud platform does not match a valid Google cryptographic key format. It was likely corrupted, truncated, or stripped of its line breaks when you uploaded it to Streamlit Cloud or GitHub.\n\n**Diagnostic Output of the loaded key:**\n`Length: {len(pk)}`\n`Newline Characters: {pk.count(chr(10))}`\n`Characters 0-35: {pk[:35]}`\n`Last 35 characters: {pk[-35:]}`\n\nPlease verify that your original exactly matches this length. Typical Google Private Keys are ~1700 characters long with ~28 strict line breaks.")
+                        import hashlib
+                        pk_hash = hashlib.md5(pk.encode('utf-8')).hexdigest()
+                        st.error(f"❌ **Google Auth Rejected Your Key!**\n\nThe app successfully loaded `credentials.json` from disk, but the generated signature was still rejected by Google. If this works locally but fails on the cloud, the file pushed to Github is either corrupted or is a different key entirely.\n\n**Diagnostic Output:**\n`Key MD5 Hash: {pk_hash}`\n`Key Length: {len(pk)}`\n`Newline Count: {pk.count(chr(10))}`\n\n**Action:** Run your local app and see if the MD5 hash matches this exactly. If they don't match, your deployed file is subtly broken! If they DO match, your Google Cloud service account might be region-locked or experiencing API scope issues.")
                         st.stop()
                     raise e
             
