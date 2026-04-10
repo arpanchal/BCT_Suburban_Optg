@@ -92,14 +92,12 @@ if sheet_url:
                 
                 if "gcp_service_account" in st.secrets:
                     creds_dict = dict(st.secrets["gcp_service_account"])
+                    if "private_key" in creds_dict:
+                        # Force sanitization of TOML-escaped or Windows-style newlines
+                        creds_dict["private_key"] = creds_dict["private_key"].replace('\\n', '\n').replace('\r\n', '\n')
+                    gc = gspread.service_account_from_dict(creds_dict)
                 else:
-                    with open(cred_path, 'r', encoding='utf-8') as f:
-                        creds_dict = json.load(f)
-                
-                if "private_key" in creds_dict:
-                    creds_dict["private_key"] = creds_dict["private_key"].replace('\\n', '\n')
-                    
-                gc = gspread.service_account_from_dict(creds_dict)
+                    gc = gspread.service_account(filename=cred_path)
             
                 progress.progress(15, "Opening Spreadsheet…")
                 sheet_id = m.group(1)
