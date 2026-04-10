@@ -14,13 +14,7 @@ st.caption("Upload an updated WTT Excel file to rebuild all JSON data files used
 
 BASE = os.path.dirname(os.path.dirname(__file__))
 
-CORRECT_SEQ = [
-    'CCG','MEL','CYR','GTR','BCL','BCT','MX','PL','PBHD','DDR',
-    'MRU','MM','BA','BDTS','KHAR','STC','VLP','ADH',
-    'JOS','RMAR','GMN','MDD','KILE','BVI',
-    'DIC','MIRA','BYR','NIG','BSR','NSP','VR',
-    'VTN','SAH','KLV','PLG','UOI','BOR','VGN','DRD'
-]
+from pages._utils import STATIONS as CORRECT_SEQ
 ARR_DEP_BASES = {
     'DDR','ADH','BVI','BYR','BSR','NSP','VR',
     'VTN','SAH','KLV','PLG','UOI','BOR','VGN','DRD'
@@ -72,7 +66,7 @@ st.markdown(
 sheet_url = st.text_input("Google Sheet URL")
 
 cred_path = os.path.join(BASE, "credentials.json")
-has_creds = os.path.exists(cred_path)
+has_creds = os.path.exists(cred_path) or "gcp_service_account" in st.secrets
 
 if sheet_url:
     m = re.search(r'/d/([a-zA-Z0-9-_]+)', sheet_url)
@@ -95,7 +89,15 @@ if sheet_url:
                 import gspread
 
                 progress.progress(5, "Authenticating with Google Sheets…")
-                gc = gspread.service_account(filename=cred_path)
+                
+                if "gcp_service_account" in st.secrets:
+                    creds_dict = dict(st.secrets["gcp_service_account"])
+                    gc = gspread.service_account_from_dict(creds_dict)
+                else:
+                    with open(cred_path, 'r', encoding='utf-8') as f:
+                        cred_raw = f.read().replace('\\n', '\n')
+                        creds_dict = json.loads(cred_raw)
+                    gc = gspread.service_account_from_dict(creds_dict)
             
                 progress.progress(15, "Opening Spreadsheet…")
                 sheet_id = m.group(1)
