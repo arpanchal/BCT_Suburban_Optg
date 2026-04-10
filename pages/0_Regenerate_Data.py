@@ -114,7 +114,16 @@ if sheet_url:
             
                 progress.progress(15, "Opening Spreadsheet…")
                 sheet_id = m.group(1)
-                wb = gc.open_by_key(sheet_id)
+                
+                try:
+                    wb = gc.open_by_key(sheet_id)
+                except Exception as e:
+                    if 'Invalid JWT Signature' in str(e):
+                        pk = creds_dict.get('private_key', '')
+                        log.empty()
+                        st.error(f"❌ **Google Auth Rejected Your Key!**\n\nThe `private_key` string loaded into the app memory by your cloud platform does not match a valid Google cryptographic key format. It was likely corrupted, truncated, or stripped of its line breaks when you uploaded it to Streamlit Cloud or GitHub.\n\n**Diagnostic Output of the loaded key:**\n`Length: {len(pk)}`\n`Newline Characters: {pk.count(chr(10))}`\n`Characters 0-35: {pk[:35]}`\n`Last 35 characters: {pk[-35:]}`\n\nPlease verify that your original exactly matches this length. Typical Google Private Keys are ~1700 characters long with ~28 strict line breaks.")
+                        st.stop()
+                    raise e
             
                 ws_sum_ws = wb.worksheet('Train Summary')
                 ws_det_ws = wb.worksheet('Stop Details')
