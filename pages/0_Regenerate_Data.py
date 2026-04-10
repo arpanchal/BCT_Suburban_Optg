@@ -90,14 +90,27 @@ if sheet_url:
 
                 progress.progress(5, "Authenticating with Google Sheets…")
                 
+                creds_dict = None
                 if "gcp_service_account" in st.secrets:
                     creds_dict = dict(st.secrets["gcp_service_account"])
-                    if "private_key" in creds_dict:
-                        # Force sanitization of TOML-escaped or Windows-style newlines
-                        creds_dict["private_key"] = creds_dict["private_key"].replace('\\n', '\n').replace('\r\n', '\n')
-                    gc = gspread.service_account_from_dict(creds_dict)
+                elif os.path.exists(cred_path):
+                    with open(cred_path, 'r', encoding='utf-8') as f:
+                        creds_dict = json.load(f)
                 else:
-                    gc = gspread.service_account(filename=cred_path)
+                    st.error("No credentials.json found on disk, and no gcp_service_account found in st.secrets.")
+                    st.stop()
+
+                if creds_dict and "private_key" in creds_dict:
+                    pk = creds_dict["private_key"]
+                    # 1. Fix literal \n text
+                    pk = pk.replace('\\n', '\n')
+                    # 2. Strip Windows carriage returns
+                    pk = pk.replace('\r\n', '\n')
+                    # 3. Strip accidental quotes
+                    pk = pk.strip('"').strip("'")
+                    
+                    creds_dict["private_key"] = pk
+                gc = gspread.service_account_from_dict(creds_dict)
             
                 progress.progress(15, "Opening Spreadsheet…")
                 sheet_id = m.group(1)
