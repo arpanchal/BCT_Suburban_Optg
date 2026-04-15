@@ -24,7 +24,7 @@ with col2:
     st.page_link("pages/4_Next_Train.py",         label="⏱️ Next Train from Station",          icon="⏱️")
     st.page_link("pages/5_Set_Working.py",        label="🔧 Set Working Sheet",                icon="🔧")
     st.page_link("pages/6_Reversal_Summary.py",   label="🔄 Reversal Summary",                 icon="🔄")
-    st.page_link("pages/7_Halt_Durations.py",     label="⏸️ Halt Durations (KLV/PLG/BOR/VGN)",icon="⏸️")
+    st.page_link("pages/7_Halt_Durations.py",     label="⏸️ Halt Durations",icon="⏸️")
 
 with col3:
     st.markdown("### 🖨️ Print & Export")
