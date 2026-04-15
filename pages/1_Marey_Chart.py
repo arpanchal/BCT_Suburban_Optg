@@ -14,7 +14,7 @@ st.sidebar.title("🗺️ Marey Chart")
 chart_mode   = st.sidebar.radio("Direction", ["Both UP & DOWN","DOWN Only","UP Only"])
 train_types  = st.sidebar.multiselect("Train Type",     ["SLOW","FAST","M/E"], default=["SLOW","FAST","M/E"])
 train_cats   = st.sidebar.multiselect("Category",       list(CAT_COLORS.keys()),
-                                       default=["LOCAL","AC_LOCAL","DRD","MAIL","EXPRESS"])
+                                       default=["LOCAL","AC_LOCAL","DRD","MAIL"])
 cars_filter  = st.sidebar.multiselect("Cars",           CARS_OPTIONS, default=CARS_OPTIONS)
 
 # Line filter — "All Lines" means no line restriction
