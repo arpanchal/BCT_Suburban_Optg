@@ -53,6 +53,61 @@ with col3:
     st.info("📋 **Station sequence**\n\n" + " → ".join(CORRECT_SEQ[:10]) + "\n→ …(" + str(len(CORRECT_SEQ)) + " total)")
 
 st.markdown("---")
+st.markdown("### 📥 Download Data as CSV")
+st.caption("Export the current JSON data files as flat CSV files for inspection, backup, or editing in Excel.")
+
+_dl_c1, _dl_c2 = st.columns(2)
+
+# ── train_meta.json → CSV ─────────────────────────────────────────────────────
+with _dl_c1:
+    st.markdown("**🗂️ train_meta.json**")
+    if os.path.exists(meta_path):
+        import pandas as _pd
+        with open(meta_path) as _f:
+            _md = json.load(_f)
+        # Flatten: train number becomes first column
+        _meta_rows = []
+        for _tr, _m in _md.items():
+            _row = {"train_no": _tr}
+            _row.update({
+                k: (json.dumps(v) if isinstance(v, (dict, list)) else v)
+                for k, v in _m.items()
+            })
+            _meta_rows.append(_row)
+        _meta_df  = _pd.DataFrame(_meta_rows)
+        _meta_csv = _meta_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label=f"⬇️ Download train_meta.csv  ({len(_meta_rows):,} trains)",
+            data=_meta_csv,
+            file_name="train_meta.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+        st.caption(f"Columns: {', '.join(_meta_df.columns.tolist()[:8])} …")
+    else:
+        st.warning("train_meta.json not found.")
+
+# ── stops_data.json → CSV ─────────────────────────────────────────────────────
+with _dl_c2:
+    st.markdown("**🛑 stops_data.json**")
+    if os.path.exists(stops_path):
+        import pandas as _pd
+        with open(stops_path) as _f:
+            _sd = json.load(_f)
+        _stops_df  = _pd.DataFrame(_sd["stops"])
+        _stops_csv = _stops_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label=f"⬇️ Download stops_data.csv  ({len(_stops_df):,} stops)",
+            data=_stops_csv,
+            file_name="stops_data.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+        st.caption(f"Columns: {', '.join(_stops_df.columns.tolist()[:8])} …")
+    else:
+        st.warning("stops_data.json not found.")
+
+st.markdown("---")
 st.markdown("### Regenerate from Google Sheet")
 st.markdown(
     "Paste the URL of the Private Google Sheet containing the WTT data. "
