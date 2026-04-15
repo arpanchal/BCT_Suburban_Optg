@@ -59,6 +59,7 @@ lookup_pages = [
     st.Page("pages/6_Reversal_Summary.py", title="Reversal Summary", icon="🔄"),
     st.Page("pages/7_Halt_Durations.py", title="Halt Durations (KLV/PLG/BOR/VGN)", icon="⏸️"),
     st.Page("pages/C_Path_Finder.py", title="Path Finder", icon="🛤️"),
+    st.Page("pages/E_Trains_Between.py", title="Trains Between Stations", icon="🔍"),
 ]
 
 print_pages = [
